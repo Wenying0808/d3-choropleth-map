@@ -4,12 +4,11 @@ let educationURL = "https://cdn.freecodecamp.org/testable-projects-fcc/data/chor
 let countyData;
 let educationData;
 
+
 let canvas = d3.select("#canvas");
 let legend = d3.select("#legend");
 let tooltip = d3.select("body").append("div");
-
 tooltip.attr('id', "tooltip")
-
 
 
 let drawMap = () => {
@@ -136,9 +135,6 @@ let drawLegend = () => {
         .attr('x', (d, i) => { return 20 + ((i + 0.8) * legendWidth) })
         .style("fill", "white")
         .text( d => d.threshold)
-
-
-
 }
 
 d3.json(countyURL).then(
@@ -164,5 +160,3 @@ d3.json(countyURL).then(
         }
     }
 )
-
-

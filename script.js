@@ -6,6 +6,9 @@ let educationData;
 
 let canvas = d3.select("#canvas");
 let legend = d3.select("#legend");
+let tooltip = d3.select("body").append("div");
+
+tooltip.attr('id', "tooltip")
 
 
 
@@ -60,7 +63,42 @@ let drawMap = () => {
                 return percentage;
             })
 
-            .attr('county', )
+            .on("mouseover", function(){
+                let countyDataItem = d3.select(this).data()[0]
+
+                tooltip.transition()
+                        .style("visibility", "visible");
+
+                let id = countyDataItem['id'];
+                let county = educationData.find((item) => {
+                    return item.fips === id;
+                });
+                let percentage = county['bachelorsOrHigher'];
+                let countyName = county['area_name']
+                let state = county['state']
+                
+                //content of tooltip
+                tooltip.text(countyName + ", " + state + " : " + percentage + "%");
+
+                //position of tooltip
+                //calculate the center of the geopath
+                let centroid = d3.geoPath().centroid(countyDataItem);
+                console.log("centroid", centroid);
+                let tooltipX = centroid[0];
+                let tooltipY = centroid[1] + 120 ;
+
+
+                tooltip.style("left", tooltipX + "px");
+                tooltip.style("top", tooltipY + "px");
+
+            } )
+
+            .on("mouseout", function(){
+                tooltip.transition()
+                        .style("visibility", "hidden")
+            })
+
+            
 }
 
 let drawLegend = () => {

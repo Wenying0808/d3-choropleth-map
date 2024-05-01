@@ -15,8 +15,18 @@ body{
 
 #description{
     color:white;
-    font-size: 18px;
+    font-size: 20px;
 }
+
+#source{
+    padding:20px;
+}
+#source a{
+    color:white;
+    font-size: 16px;
+}
+
+
 
 #canvas{
     width: 1000px;

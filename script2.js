@@ -1,5 +1,5 @@
 let countyURL = "https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/counties.json";
-let educationURL = "https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/for_user_education.json";
+
 
 let countyData;
 let educationData;
@@ -10,16 +10,14 @@ let legend = d3.select("#legend");
 let tooltip = d3.select("body").append("div");
 tooltip.attr('id', "tooltip")
 
-/*
+
 let dataSelect = d3.select("#dataSelect");
-let selectedData = "2010-2014";
+let selectedData = dataSelect.node().value; //use node() to access the DOM element
+
+
 dataSelect.on("change", function(){
     selectedData = this.value;
-    console.log("selectedData", selectedData);
 })
-*/
-
-
 
 
 let drawMap = () => {
@@ -37,10 +35,11 @@ let drawMap = () => {
             //map county id from county data to fig from education data
             .attr('fill', (countyDataItem) => {
                 let id = countyDataItem['id'];
-                let county = educationData.find((item) => {
-                    return item.fips === id;
-                })
-                let percentage = county['bachelorsOrHigher']
+
+                let county = educationData.find(item => parseFloat(item["Federal Information Processing Standard (FIPS) Code"]) === id
+                );
+                
+                let percentage = county ? county.Value : null;
 
                 if(percentage <= 10){
                     return '#E0F8F1';
@@ -67,9 +66,9 @@ let drawMap = () => {
             .attr('data-education', (countyDataItem) => {
                 let id = countyDataItem['id'];
                 let county = educationData.find((item) => {
-                    return item.fips === id;
+                    return parseFloat(item["Federal Information Processing Standard (FIPS) Code"]) === id;
                 })
-                let percentage = county['bachelorsOrHigher']
+                let percentage = county ? county.Value : null;
                 return percentage;
             })
 
@@ -79,13 +78,17 @@ let drawMap = () => {
                 tooltip.transition()
                         .style("visibility", "visible");
 
-                let id = countyDataItem['id'];
+                let id = countyDataItem['id']; 
+                
+                
                 let county = educationData.find((item) => {
-                    return item.fips === id;
-                });
-                let percentage = county['bachelorsOrHigher'];
-                let countyName = county['area_name']
-                let state = county['state']
+                    return parseFloat(item["Federal Information Processing Standard (FIPS) Code"]) === id;
+                })
+
+                
+                let percentage = county ? county.Value : null;
+                let countyName = county ? county['Area name']: null;
+                let state = county ? county.State: null;
                 
                 //content of tooltip
                 tooltip.text(countyName + ", " + state + " : " + percentage + "%");
@@ -152,42 +155,29 @@ d3.json(countyURL).then(
     (data, error) => {
         if(error){
             console.log("fetch county data", log);
-        } else{
+        }else{
             countyData = topojson.feature(data, data.objects.counties).features; //convert topojson to geojson and only select featutres data which will be used to draw geo map
             console.log("county data", countyData);
 
-            d3.json(educationURL).then(
-                (data, error) => {
-                    if(error){
-                        console.log("fetch education data",log);
-                    } else{
-                        educationData = data;
-                        console.log("education data", educationData);
-                        drawMap();
-                        drawLegend();
-                    }
-                }
-            )
+
+            d3.csv("Education.csv").then(function(data, error){
+                if(error){
+                    console.log("fetch education data",log);
+                } else {
+
+                let attributeData201721 = data.filter(function(row){
+                    return row["Attribute"] === "Percent of adults with a bachelor's degree or higher, 2017-21" ;
+                })
+
+                educationData = attributeData201721;
+                console.log("education data", educationData);
+
+                    drawMap();
+                    drawLegend();
+                }})
+        
         }
     }
 )
 
-/*
-d3.csv("Education.csv").then(function(data){
 
-    let attributeData = data.filter(function(row){
-        return row["Attribute"] === "Percent of adults with a bachelor's degree or higher, 2017-21" ;
-    })
-
-    attributeData.forEach(function(row) {
-        let countyId = row['Federal Information Processing Standard (FIPS) Code'];
-        let state = row['Sate'];
-        let areaName = row['Area name'];
-
-        let percentage201721 = row['Value'];
-        
-        console.log("County ID:", countyId);
-        console.log("Percent of adults with a bachelor's degree or higher, 2017-21 :", percentage201721 );
-    })
-})
-*/

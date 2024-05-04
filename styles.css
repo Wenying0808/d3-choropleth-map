@@ -27,18 +27,25 @@ body{
 }
 
 #navigation {
-    background-color: aqua;
-    border-radius: 8px;
+    
+    
     margin-bottom: 20px;
     
 }
+
 #navigation a{
     display: block;
+    background-color: aqua;
     color:black;
     font-size: 16px;
     padding:10px;
+    border-radius: 8px;
     text-decoration: none;
     font-size: 20px;
+}
+
+#navigation a:hover{
+    background-color: rgb(70, 183, 254);
 }
 
 

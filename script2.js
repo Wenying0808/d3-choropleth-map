@@ -18,6 +18,7 @@ selectedData = "2008-2012";
 
 
 let drawMap = () => {
+
     canvas.selectAll('path')
             .data(countyData)
             .enter()
@@ -85,7 +86,18 @@ let drawMap = () => {
                 let state = county ? county.State: null;
                 
                 //content of tooltip
-                tooltip.text(countyName + ", " + state + " : " + percentage + "%");
+                if (percentage != null){
+                    tooltip.text(countyName + ", " + state + " : " + percentage + "%" );
+                } else {
+                    //the county missing the percentage value
+                    let missingCounty = allEducationData.find((item) => {
+                        return parseFloat(item["Federal Information Processing Standard (FIPS) Code"]) === id;
+                    })
+                    countyName = missingCounty['Area name'];
+                    state = missingCounty['State'];
+                    tooltip.text(countyName + ", " + state + " : Missing Data" )
+                }
+                
 
                 //position of tooltip
                 //calculate the center of the geopath
@@ -145,6 +157,7 @@ dataSelect.on("change", function(){
     selectedData = this.value;
     console.log("selectedData", selectedData);
 
+    
     let attributeData = allEducationData.filter(function(row) {
         if (selectedData === "2017-2021") {
             return row["Attribute"] === "Percent of adults with a bachelor's degree or higher, 2017-21";
@@ -162,6 +175,7 @@ dataSelect.on("change", function(){
     //redraw
     drawMap();
     drawLegend();
+    
 
 })
 

@@ -33,9 +33,10 @@ body{
     
 }
 #navigation a{
+    display: block;
     color:black;
     font-size: 16px;
-    margin:20px;
+    padding:10px;
     text-decoration: none;
     font-size: 20px;
 }

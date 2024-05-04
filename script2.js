@@ -2,7 +2,8 @@ let countyURL = "https://cdn.freecodecamp.org/testable-projects-fcc/data/choropl
 
 
 let countyData;
-let educationData;
+let filteredEducationData;
+let allEducationData;
 
 
 let canvas = d3.select("#canvas");
@@ -13,11 +14,7 @@ tooltip.attr('id', "tooltip")
 
 let dataSelect = d3.select("#dataSelect");
 let selectedData = dataSelect.node().value; //use node() to access the DOM element
-
-
-dataSelect.on("change", function(){
-    selectedData = this.value;
-})
+selectedData = "2008-2012";
 
 
 let drawMap = () => {
@@ -36,9 +33,8 @@ let drawMap = () => {
             .attr('fill', (countyDataItem) => {
                 let id = countyDataItem['id'];
 
-                let county = educationData.find(item => parseFloat(item["Federal Information Processing Standard (FIPS) Code"]) === id
-                );
-                
+                let county = filteredEducationData.find(item => parseFloat(item["Federal Information Processing Standard (FIPS) Code"]) === id);
+
                 let percentage = county ? county.Value : null;
 
                 if(percentage <= 10){
@@ -65,7 +61,7 @@ let drawMap = () => {
 
             .attr('data-education', (countyDataItem) => {
                 let id = countyDataItem['id'];
-                let county = educationData.find((item) => {
+                let county = filteredEducationData.find((item) => {
                     return parseFloat(item["Federal Information Processing Standard (FIPS) Code"]) === id;
                 })
                 let percentage = county ? county.Value : null;
@@ -80,11 +76,9 @@ let drawMap = () => {
 
                 let id = countyDataItem['id']; 
                 
-                
-                let county = educationData.find((item) => {
+                let county = filteredEducationData.find((item) => {
                     return parseFloat(item["Federal Information Processing Standard (FIPS) Code"]) === id;
                 })
-
                 
                 let percentage = county ? county.Value : null;
                 let countyName = county ? county['Area name']: null;
@@ -100,18 +94,14 @@ let drawMap = () => {
                 let tooltipX = centroid[0];
                 let tooltipY = centroid[1] + 120 ;
 
-
                 tooltip.style("left", tooltipX + "px");
                 tooltip.style("top", tooltipY + "px");
-
-            } )
+            })
 
             .on("mouseout", function(){
                 tooltip.transition()
                         .style("visibility", "hidden")
             })
-
-            
 }
 
 let drawLegend = () => {
@@ -151,6 +141,31 @@ let drawLegend = () => {
         .text( d => d.threshold)
 }
 
+dataSelect.on("change", function(){
+    selectedData = this.value;
+    console.log("selectedData", selectedData);
+
+    let attributeData = allEducationData.filter(function(row) {
+        if (selectedData === "2017-2021") {
+            return row["Attribute"] === "Percent of adults with a bachelor's degree or higher, 2017-21";
+        } else if (selectedData === "2008-2012") {
+            return row["Attribute"] === "Percent of adults with a bachelor's degree or higher, 2008-12";
+        }
+    });
+
+    filteredEducationData = attributeData;
+    console.log("education data after change selection", filteredEducationData);
+
+    // Clear existing map !!!!
+    canvas.selectAll('.county').remove();
+
+    //redraw
+    drawMap();
+    drawLegend();
+
+})
+
+
 d3.json(countyURL).then(
     (data, error) => {
         if(error){
@@ -162,18 +177,27 @@ d3.json(countyURL).then(
 
             d3.csv("Education.csv").then(function(data, error){
                 if(error){
-                    console.log("fetch education data",log);
+                    console.log("fetch education data",error);
                 } else {
+                    allEducationData = data;
 
-                let attributeData201721 = data.filter(function(row){
-                    return row["Attribute"] === "Percent of adults with a bachelor's degree or higher, 2017-21" ;
-                })
+                    let attributeData = data.filter(function(row){
+                        if (selectedData === "2017-2021"){
+                            return row["Attribute"] === "Percent of adults with a bachelor's degree or higher, 2017-21" ;
+                        } else if (selectedData === "2008-2012"){
+                            return row["Attribute"] === "Percent of adults with a bachelor's degree or higher, 2008-12" ;
+                        }
+                        
+                    })
 
-                educationData = attributeData201721;
-                console.log("education data", educationData);
+                    filteredEducationData = attributeData;
+                    console.log("education data", filteredEducationData);
 
                     drawMap();
                     drawLegend();
+
+
+                    
                 }})
         
         }
